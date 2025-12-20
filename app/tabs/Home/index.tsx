@@ -6,18 +6,50 @@ import {
   Animated,
   Dimensions,
   Image,
+  Platform,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  SafeAreaView,
+  useWindowDimensions,
 } from 'react-native';
 import { useApp } from '../../../contexts/AppContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+
+/* ────────────────────── Responsive Helper Functions ────────────────────── */
+const scale = (size: number) => {
+  const baseWidth = 375; // iPhone 13/14 width
+  const scaleFactor = Math.min(SCREEN_WIDTH / baseWidth, 1.8); // Limit max scaling
+  return size * scaleFactor;
+};
+
+const verticalScale = (size: number) => {
+  const baseHeight = 812; // iPhone 13/14 height
+  const scaleFactor = Math.min(SCREEN_HEIGHT / baseHeight, 1.5);
+  return size * scaleFactor;
+};
+
+const moderateScale = (size: number, factor = 0.5) => {
+  return size + (scale(size) - size) * factor;
+};
+
+// Responsive spacing
+const rs = (size: number) => moderateScale(size);
+// Responsive font size
+const rfs = (size: number) => moderateScale(size, 0.3);
+
+// Responsive component size
+const getResponsiveCardWidth = (screenWidth: number) => {
+  if (screenWidth > 1024) return rs(240); // Large tablets/desktops
+  if (screenWidth > 768) return rs(200);  // Tablets
+  if (screenWidth < 350) return rs(140);  // Small phones
+  return rs(170); // Standard phones
+};
 
 /* ────────────────────── Reusable Components ────────────────────── */
 const Header = () => {
@@ -25,34 +57,116 @@ const Header = () => {
   const { colors } = useTheme();
   const router = useRouter();
   const cartCount = getCartCount();
+  const { width } = useWindowDimensions();
+  
+  const isLargeScreen = width > 768;
+  const isSmallScreen = width < 350;
 
   return (
-    <View style={[s.header, { backgroundColor: colors.background }]}>
+    <View style={[
+      s.header, 
+      { 
+        backgroundColor: colors.background,
+        paddingHorizontal: isLargeScreen ? rs(30) : rs(20),
+        paddingTop: Platform.OS === 'ios' ? rs(20) : rs(30),
+        paddingBottom: rs(12),
+      }
+    ]}>
       <View style={s.headerLeft}>
-        <Image source={{ uri: 'https://placehold.co/56x56/6366f1/fff?text=JW' }} style={[s.avatar, { borderColor: colors.primary }]} />
+        <Image 
+          source={{ uri: 'https://placehold.co/56x56/6366f1/fff?text=JW' }} 
+          style={[
+            s.avatar, 
+            { 
+              borderColor: colors.primary,
+              width: isLargeScreen ? rs(56) : rs(52),
+              height: isLargeScreen ? rs(56) : rs(52),
+              borderRadius: isLargeScreen ? rs(28) : rs(26),
+            }
+          ]} 
+        />
         <View>
-          <Text style={[s.welcome, { color: colors.textSecondary }]}>Welcome back,</Text>
-          <Text style={[s.user, { color: colors.text }]}>John William</Text>
+          <Text style={[
+            s.welcome, 
+            { color: colors.textSecondary },
+            isLargeScreen && s.welcomeLarge,
+            isSmallScreen && s.welcomeSmall,
+          ]}>
+            Welcome back,
+          </Text>
+          <Text style={[
+            s.user, 
+            { color: colors.text },
+            isLargeScreen && s.userLarge,
+            isSmallScreen && s.userSmall,
+          ]}>
+            John William
+          </Text>
         </View>
       </View>
 
-      <View style={s.headerRight}>
+      <View style={[
+        s.headerRight,
+        { gap: isLargeScreen ? rs(16) : rs(12) }
+      ]}>
         <TouchableOpacity 
-          style={[s.iconBtn, { backgroundColor: colors.surface }]}
+          style={[
+            s.iconBtn, 
+            { 
+              backgroundColor: colors.surface,
+              padding: isLargeScreen ? rs(10) : rs(8),
+              borderRadius: rs(999),
+            }
+          ]}
           onPress={() => router.push('/notifications')}
         >
-          <Ionicons name="notifications-outline" size={24} color={colors.text} />
-          <View style={[s.badge, { backgroundColor: colors.error }]} />
+          <Ionicons 
+            name="notifications-outline" 
+            size={isLargeScreen ? rs(26) : rs(24)} 
+            color={colors.text} 
+          />
+          <View style={[
+            s.badge, 
+            { 
+              backgroundColor: colors.error,
+              width: isLargeScreen ? rs(12) : rs(10),
+              height: isLargeScreen ? rs(12) : rs(10),
+              borderRadius: isLargeScreen ? rs(6) : rs(5),
+            }
+          ]} />
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[s.cartBtn, { backgroundColor: colors.primary }]}
+          style={[
+            s.cartBtn, 
+            { 
+              backgroundColor: colors.primary,
+              padding: isLargeScreen ? rs(11) : rs(9),
+              borderRadius: rs(999),
+            }
+          ]}
           onPress={() => router.push('/tabs/Cart')}
         >
-          <Ionicons name="cart-outline" size={26} color="#fff" />
+          <Ionicons 
+            name="cart-outline" 
+            size={isLargeScreen ? rs(28) : rs(26)} 
+            color="#fff" 
+          />
           {cartCount > 0 && (
-            <View style={s.cartBadge}>
-              <Text style={s.cartBadgeText}>{cartCount}</Text>
+            <View style={[
+              s.cartBadge,
+              {
+                minWidth: isLargeScreen ? rs(22) : rs(18),
+                height: isLargeScreen ? rs(22) : rs(18),
+                borderRadius: isLargeScreen ? rs(11) : rs(9),
+              }
+            ]}>
+              <Text style={[
+                s.cartBadgeText,
+                { fontSize: isLargeScreen ? rfs(12) : rfs(11) }
+              ]}>
+                {cartCount > 99 ? '99+' : cartCount}
+              </Text>
             </View>
           )}
         </TouchableOpacity>
@@ -65,25 +179,55 @@ const SearchBar = () => {
   const [focused, setFocused] = useState(false);
   const { colors } = useTheme();
   const { searchQuery, setSearchQuery } = useApp();
+  const { width } = useWindowDimensions();
+  
+  const isLargeScreen = width > 768;
+  const isSmallScreen = width < 350;
 
   return (
-    <View style={[s.searchContainer, { 
-      backgroundColor: colors.surface,
-      borderColor: focused ? colors.primary : colors.border 
-    }]}>
-      <Ionicons name="search" size={20} color={focused ? colors.primary : colors.textSecondary} />
+    <View style={[
+      s.searchContainer, 
+      { 
+        backgroundColor: colors.surface,
+        borderColor: focused ? colors.primary : colors.border,
+        borderRadius: isLargeScreen ? rs(20) : rs(16),
+        paddingHorizontal: isLargeScreen ? rs(18) : rs(14),
+        paddingVertical: isLargeScreen ? rs(14) : rs(12),
+        borderWidth: StyleSheet.hairlineWidth,
+      }
+    ]}>
+      <Ionicons 
+        name="search" 
+        size={isLargeScreen ? rs(22) : rs(20)} 
+        color={focused ? colors.primary : colors.textSecondary} 
+      />
       <TextInput
         placeholder="Search products, brands…"
         placeholderTextColor={colors.textSecondary}
-        style={[s.searchInput, { color: colors.text }]}
+        style={[
+          s.searchInput, 
+          { 
+            color: colors.text,
+            fontSize: isLargeScreen ? rfs(16) : rfs(15),
+            marginLeft: isLargeScreen ? rs(12) : rs(10),
+          }
+        ]}
         value={searchQuery}
         onChangeText={setSearchQuery}
         onFocus={() => setFocused(true)}
         onBlur={() => setFocused(false)}
+        accessibilityLabel="Search products"
       />
       {focused && searchQuery && (
-        <TouchableOpacity onPress={() => setSearchQuery('')}>
-          <Ionicons name="close" size={20} color={colors.primary} />
+        <TouchableOpacity 
+          onPress={() => setSearchQuery('')}
+          accessibilityLabel="Clear search"
+        >
+          <Ionicons 
+            name="close" 
+            size={isLargeScreen ? rs(22) : rs(20)} 
+            color={colors.primary} 
+          />
         </TouchableOpacity>
       )}
     </View>
@@ -93,48 +237,137 @@ const SearchBar = () => {
 /* Hero Banner Carousel */
 const Banner = () => {
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
   const scrollX = useRef(new Animated.Value(0)).current;
+  
+  const isLargeScreen = width > 768;
+  const isSmallScreen = width < 350;
+  const bannerWidth = width - (isLargeScreen ? rs(80) : rs(40));
+  const bannerHeight = isLargeScreen ? rs(240) : isSmallScreen ? rs(160) : rs(200);
+
   const banners: Array<{ title: string; discount: string; collection: string; color: [string, string] }> = [
     { title: 'Winter Sale', discount: '30% OFF', collection: 'Cozy Essentials', color: ['#4c1d95', '#7c3aed'] },
-    { title: 'Tech Fest', discount: 'UP TO 50%', collection: 'Gadgets & Gear', color: ['#1e293b', '#475569'] },
+    { title: 'Tech Fest', discount: 'UP 50%', collection: 'Gadgets & Gear', color: ['#1e293b', '#475569'] },
     { title: 'Style Drop', discount: '25% OFF', collection: 'Streetwear', color: ['#0f172a', '#1e293b'] },
   ];
 
   return (
-    <View style={s.bannerWrapper}>
+    <View style={[
+      s.bannerWrapper,
+      {
+        marginHorizontal: isLargeScreen ? rs(30) : rs(20),
+        marginVertical: isLargeScreen ? rs(24) : rs(16),
+        height: bannerHeight,
+        borderRadius: isLargeScreen ? rs(28) : rs(24),
+      }
+    ]}>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], { useNativeDriver: false })}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+          { useNativeDriver: false }
+        )}
         scrollEventThrottle={16}
       >
         {banners.map((b, i) => (
-          <LinearGradient key={i} colors={b.color} style={s.bannerCard}>
+          <LinearGradient 
+            key={i} 
+            colors={b.color} 
+            style={[
+              s.bannerCard,
+              { 
+                width: bannerWidth, 
+                height: bannerHeight,
+                padding: isLargeScreen ? rs(28) : rs(20),
+              }
+            ]}
+          >
             <View style={s.bannerText}>
-              <Text style={s.bannerTag}>{b.title}</Text>
-              <Text style={s.bannerDiscount}>{b.discount}</Text>
-              <Text style={s.bannerSubtitle}>{b.collection}</Text>
-              <TouchableOpacity style={s.bannerCta}>
-                <Text style={s.bannerCtaText}>Shop Now</Text>
+              <Text style={[
+                s.bannerTag,
+                { fontSize: isLargeScreen ? rfs(16) : rfs(14) }
+              ]}>
+                {b.title}
+              </Text>
+              <Text style={[
+                s.bannerDiscount,
+                { 
+                  fontSize: isLargeScreen ? rfs(42) : rfs(36),
+                  marginVertical: isLargeScreen ? rs(8) : rs(4),
+                }
+              ]}>
+                {b.discount}
+              </Text>
+              <Text style={[
+                s.bannerSubtitle,
+                { fontSize: isLargeScreen ? rfs(18) : rfs(16) }
+              ]}>
+                {b.collection}
+              </Text>
+              <TouchableOpacity style={[
+                s.bannerCta,
+                {
+                  marginTop: isLargeScreen ? rs(16) : rs(12),
+                  paddingHorizontal: isLargeScreen ? rs(20) : rs(16),
+                  paddingVertical: isLargeScreen ? rs(8) : rs(6),
+                  borderRadius: rs(999),
+                }
+              ]}>
+                <Text style={[
+                  s.bannerCtaText,
+                  { fontSize: isLargeScreen ? rfs(14) : rfs(13) }
+                ]}>
+                  Shop Now
+                </Text>
               </TouchableOpacity>
             </View>
             <Image
               source={{ uri: 'https://placehold.co/180x180/fff/000?text=Img' }}
-              style={s.bannerImg}
+              style={[
+                s.bannerImg,
+                {
+                  width: isLargeScreen ? rs(130) : rs(110),
+                  height: isLargeScreen ? rs(130) : rs(110),
+                  borderRadius: isLargeScreen ? rs(20) : rs(16),
+                  marginLeft: isLargeScreen ? rs(20) : rs(12),
+                }
+              ]}
             />
           </LinearGradient>
         ))}
       </ScrollView>
 
       {/* Dots */}
-      <View style={s.dots}>
+      <View style={[s.dots, { marginTop: isLargeScreen ? rs(16) : rs(12) }]}>
         {banners.map((_, i) => {
-          const inputRange = [(i - 1) * SCREEN_WIDTH, i * SCREEN_WIDTH, (i + 1) * SCREEN_WIDTH];
-          const dotWidth = scrollX.interpolate({ inputRange, outputRange: [8, 20, 8], extrapolate: 'clamp' });
-          const opacity = scrollX.interpolate({ inputRange, outputRange: [0.3, 1, 0.3], extrapolate: 'clamp' });
+          const inputRange = [(i - 1) * bannerWidth, i * bannerWidth, (i + 1) * bannerWidth];
+          const dotWidth = scrollX.interpolate({ 
+            inputRange, 
+            outputRange: [rs(8), rs(20), rs(8)], 
+            extrapolate: 'clamp' 
+          });
+          const opacity = scrollX.interpolate({ 
+            inputRange, 
+            outputRange: [0.3, 1, 0.3], 
+            extrapolate: 'clamp' 
+          });
           return (
-            <Animated.View key={i} style={[s.dot, { width: dotWidth, opacity, backgroundColor: colors.primary }]} />
+            <Animated.View 
+              key={i} 
+              style={[
+                s.dot, 
+                { 
+                  height: rs(8), 
+                  borderRadius: rs(4), 
+                  marginHorizontal: rs(4),
+                  width: dotWidth, 
+                  opacity, 
+                  backgroundColor: colors.primary 
+                }
+              ]} 
+            />
           );
         })}
       </View>
@@ -144,12 +377,44 @@ const Banner = () => {
 
 const SectionHeader: React.FC<{ title: string }> = ({ title }) => {
   const { colors } = useTheme();
+  const { width } = useWindowDimensions();
+  
+  const isLargeScreen = width > 768;
+  const isSmallScreen = width < 350;
+
   return (
-    <View style={s.sectionHeader}>
-      <Text style={[s.sectionTitle, { color: colors.text }]}>{title}</Text>
+    <View style={[
+      s.sectionHeader,
+      {
+        paddingHorizontal: isLargeScreen ? rs(30) : rs(20),
+        marginBottom: isLargeScreen ? rs(16) : rs(12),
+      }
+    ]}>
+      <Text style={[
+        s.sectionTitle, 
+        { 
+          color: colors.text,
+          fontSize: isLargeScreen ? rfs(26) : rfs(22),
+        }
+      ]}>
+        {title}
+      </Text>
       <TouchableOpacity style={s.seeAll}>
-        <Text style={[s.seeAllText, { color: colors.primary }]}>See All</Text>
-        <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+        <Text style={[
+          s.seeAllText, 
+          { 
+            color: colors.primary,
+            fontSize: isLargeScreen ? rfs(15) : rfs(14),
+            marginRight: rs(4),
+          }
+        ]}>
+          See All
+        </Text>
+        <Ionicons 
+          name="chevron-forward" 
+          size={isLargeScreen ? rs(18) : rs(16)} 
+          color={colors.primary} 
+        />
       </TouchableOpacity>
     </View>
   );
@@ -158,13 +423,27 @@ const SectionHeader: React.FC<{ title: string }> = ({ title }) => {
 const ProductCard: React.FC<{ product: any; onPress: () => void }> = ({ product, onPress }) => {
   const { colors } = useTheme();
   const { addToCart, addToWishlist, removeFromWishlist, isInWishlist } = useApp();
+  const { width } = useWindowDimensions();
   const scale = useRef(new Animated.Value(1)).current;
   const inWishlist = isInWishlist(product.id);
+  
+  const isLargeScreen = width > 768;
+  const isSmallScreen = width < 350;
+  const cardWidth = getResponsiveCardWidth(width);
+  const imageHeight = isLargeScreen ? rs(160) : isSmallScreen ? rs(120) : rs(140);
 
   const animatePress = () => {
     Animated.sequence([
-      Animated.timing(scale, { toValue: 0.96, duration: 80, useNativeDriver: true }),
-      Animated.timing(scale, { toValue: 1, duration: 80, useNativeDriver: true }),
+      Animated.timing(scale, { 
+        toValue: 0.96, 
+        duration: 80, 
+        useNativeDriver: true 
+      }),
+      Animated.timing(scale, { 
+        toValue: 1, 
+        duration: 80, 
+        useNativeDriver: true 
+      }),
     ]).start();
   };
 
@@ -184,34 +463,112 @@ const ProductCard: React.FC<{ product: any; onPress: () => void }> = ({ product,
   };
 
   return (
-    <Animated.View style={[s.card, { 
-      backgroundColor: colors.card,
-      borderColor: colors.borderLight,
-      transform: [{ scale }] 
-    }]}>
-      <TouchableOpacity activeOpacity={0.9} onPress={onPress}>
+    <Animated.View style={[
+      s.card, 
+      { 
+        backgroundColor: colors.card,
+        borderColor: colors.borderLight,
+        transform: [{ scale }],
+        width: cardWidth,
+        borderRadius: isLargeScreen ? rs(24) : rs(20),
+        marginHorizontal: rs(8),
+      }
+    ]}>
+      <TouchableOpacity 
+        activeOpacity={0.9} 
+        onPress={onPress}
+        accessibilityLabel={`View ${product.name}`}
+      >
         <View style={s.cardImageWrapper}>
-          <Image source={{ uri: product.image }} style={s.cardImage} />
+          <Image 
+            source={{ uri: product.image }} 
+            style={[
+              s.cardImage,
+              { 
+                height: imageHeight,
+                borderTopLeftRadius: isLargeScreen ? rs(24) : rs(20),
+                borderTopRightRadius: isLargeScreen ? rs(24) : rs(20),
+              }
+            ]} 
+            resizeMode="cover"
+          />
           <TouchableOpacity 
-            style={[s.favBtn, { backgroundColor: inWishlist ? colors.error : 'rgba(0,0,0,0.4)' }]}
+            style={[
+              s.favBtn, 
+              { 
+                backgroundColor: inWishlist ? colors.error : 'rgba(0,0,0,0.4)',
+                padding: isLargeScreen ? rs(8) : rs(6),
+                borderRadius: rs(999),
+                top: rs(10),
+                right: rs(10),
+              }
+            ]}
             onPress={handleWishlist}
+            accessibilityLabel={inWishlist ? "Remove from wishlist" : "Add to wishlist"}
           >
-            <Ionicons name={inWishlist ? 'heart' : 'heart-outline'} size={20} color="#fff" />
+            <Ionicons 
+              name={inWishlist ? 'heart' : 'heart-outline'} 
+              size={isLargeScreen ? rs(22) : rs(20)} 
+              color="#fff" 
+            />
           </TouchableOpacity>
         </View>
 
-        <View style={s.cardBody}>
-          <Text style={[s.cardName, { color: colors.text }]} numberOfLines={2}>
+        <View style={[
+          s.cardBody,
+          { padding: isLargeScreen ? rs(16) : rs(12) }
+        ]}>
+          <Text style={[
+            s.cardName, 
+            { 
+              color: colors.text,
+              fontSize: isLargeScreen ? rfs(16) : rfs(14),
+              lineHeight: isLargeScreen ? rfs(20) : rfs(18),
+              marginBottom: rs(4),
+            }
+          ]} 
+            numberOfLines={2}
+            accessibilityLabel={product.name}
+          >
             {product.name}
           </Text>
-          <Text style={[s.cardPrice, { color: colors.primary }]}>${product.price.toFixed(2)}</Text>
+          <Text style={[
+            s.cardPrice, 
+            { 
+              color: colors.primary,
+              fontSize: isLargeScreen ? rfs(20) : rfs(18),
+            }
+          ]}>
+            ${product.price.toFixed(2)}
+          </Text>
 
           <TouchableOpacity 
-            style={[s.addBtn, { backgroundColor: colors.primary }]} 
+            style={[
+              s.addBtn, 
+              { 
+                backgroundColor: colors.primary,
+                marginTop: rs(8),
+                paddingVertical: isLargeScreen ? rs(8) : rs(6),
+                borderRadius: isLargeScreen ? rs(14) : rs(12),
+              }
+            ]} 
             onPress={handleAddToCart}
+            accessibilityLabel="Add to cart"
           >
-            <Ionicons name="add" size={18} color="#fff" />
-            <Text style={s.addBtnText}>Add</Text>
+            <Ionicons 
+              name="add" 
+              size={isLargeScreen ? rs(20) : rs(18)} 
+              color="#fff" 
+            />
+            <Text style={[
+              s.addBtnText,
+              { 
+                fontSize: isLargeScreen ? rfs(14) : rfs(13),
+                marginLeft: rs(6),
+              }
+            ]}>
+              Add
+            </Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
@@ -221,11 +578,29 @@ const ProductCard: React.FC<{ product: any; onPress: () => void }> = ({ product,
 
 const ProductSection: React.FC<{ title: string; data: any[] }> = ({ title, data }) => {
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  
+  const isLargeScreen = width > 768;
+  const cardWidth = getResponsiveCardWidth(width);
+  const cardMargin = rs(8);
+  const visibleCards = Math.floor(width / (cardWidth + cardMargin * 2));
 
   return (
     <View style={s.section}>
       <SectionHeader title={title} />
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={s.sectionScroll}>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false} 
+        contentContainerStyle={[
+          s.sectionScroll,
+          {
+            paddingLeft: isLargeScreen ? rs(30) : rs(12),
+            paddingRight: isLargeScreen ? rs(30) : rs(12),
+          }
+        ]}
+        snapToInterval={cardWidth + cardMargin * 2}
+        decelerationRate="fast"
+      >
         {data.map((p) => (
           <ProductCard 
             key={p.id} 
@@ -233,6 +608,8 @@ const ProductSection: React.FC<{ title: string; data: any[] }> = ({ title, data 
             onPress={() => router.push(`/product/${p.id}`)}
           />
         ))}
+        {/* Add empty space at the end for better scrolling */}
+        <View style={{ width: rs(20) }} />
       </ScrollView>
     </View>
   );
@@ -242,6 +619,9 @@ const ProductSection: React.FC<{ title: string; data: any[] }> = ({ title, data 
 export default function HomeTab() {
   const { colors } = useTheme();
   const { products, searchQuery } = useApp();
+  const { width } = useWindowDimensions();
+  
+  const isLargeScreen = width > 768;
 
   // Filter products based on search query
   const filteredProducts = products.filter((p) =>
@@ -258,12 +638,22 @@ export default function HomeTab() {
         <Header />
 
         {/* Fixed Search */}
-        <View style={s.searchWrapper}>
+        <View style={[
+          s.searchWrapper,
+          { 
+            paddingHorizontal: isLargeScreen ? rs(30) : rs(20),
+            paddingVertical: isLargeScreen ? rs(16) : rs(12),
+          }
+        ]}>
           <SearchBar />
         </View>
 
         {/* Scrollable Area */}
-        <ScrollView style={s.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView 
+          style={s.scroll} 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={s.scrollContent}
+        >
           <Banner />
           {featuredProducts.length > 0 && (
             <ProductSection title="Featured Deals" data={featuredProducts} />
@@ -272,12 +662,31 @@ export default function HomeTab() {
             <ProductSection title="Most Popular" data={popularProducts} />
           )}
           {filteredProducts.length === 0 && searchQuery && (
-            <View style={s.emptyState}>
-              <Ionicons name="search-outline" size={64} color={colors.textSecondary} />
-              <Text style={[s.emptyText, { color: colors.textSecondary }]}>No products found</Text>
+            <View style={[
+              s.emptyState,
+              { paddingVertical: rs(60) }
+            ]}>
+              <Ionicons 
+                name="search-outline" 
+                size={rs(64)} 
+                color={colors.textSecondary} 
+              />
+              <Text style={[
+                s.emptyText, 
+                { 
+                  color: colors.textSecondary,
+                  fontSize: rfs(16),
+                  marginTop: rs(16),
+                }
+              ]}>
+                No products found
+              </Text>
             </View>
           )}
-          <View style={s.bottomSpacer} />
+          <View style={[
+            s.bottomSpacer,
+            { height: rs(60) }
+          ]} />
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -287,10 +696,18 @@ export default function HomeTab() {
 /* ────────────────────── Styles ────────────────────── */
 const s = StyleSheet.create({
   /* Layout */
-  container: { flex: 1 },
+  container: { 
+    flex: 1,
+  },
   frame: {
     width: '100%',
     flex: 1,
+  },
+  scroll: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
 
   /* Header */
@@ -298,124 +715,190 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 12,
   },
-  headerLeft: { flexDirection: 'row', alignItems: 'center', columnGap: 12 },
-  avatar: { width: 52, height: 52, borderRadius: 26, borderWidth: 2 },
-  welcome: { fontSize: 13, fontWeight: '500' },
-  user: { fontSize: 20, fontWeight: '700', letterSpacing: -0.3 },
-  headerRight: { flexDirection: 'row', columnGap: 12 },
-  iconBtn: { position: 'relative', padding: 8, borderRadius: 999 },
+  headerLeft: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    columnGap: rs(12) 
+  },
+  avatar: {
+    borderWidth: 2,
+  },
+  welcome: { 
+    fontSize: rfs(13), 
+    fontWeight: '500' 
+  },
+  welcomeLarge: {
+    fontSize: rfs(15),
+  },
+  welcomeSmall: {
+    fontSize: rfs(11),
+  },
+  user: { 
+    fontSize: rfs(20), 
+    fontWeight: Platform.OS === 'ios' ? '700' : 'bold',
+    letterSpacing: -0.3,
+  },
+  userLarge: {
+    fontSize: rfs(24),
+  },
+  userSmall: {
+    fontSize: rfs(18),
+  },
+  headerRight: { 
+    flexDirection: 'row',
+  },
+  iconBtn: { 
+    position: 'relative',
+  },
   badge: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    top: rs(6),
+    right: rs(6),
     borderWidth: 1.5,
+    borderColor: '#fff',
   },
-  cartBtn: { position: 'relative', padding: 9, borderRadius: 999 },
+  cartBtn: { 
+    position: 'relative',
+  },
   cartBadge: {
     position: 'absolute',
-    top: -4,
-    right: -4,
-    minWidth: 18,
-    height: 18,
+    top: rs(-4),
+    right: rs(-4),
     backgroundColor: '#fff',
-    borderRadius: 9,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#6366f1',
   },
-  cartBadgeText: { color: '#6366f1', fontSize: 11, fontWeight: '700' },
+  cartBadgeText: { 
+    color: '#6366f1', 
+    fontWeight: Platform.OS === 'ios' ? '700' : 'bold',
+    paddingHorizontal: rs(4),
+  },
 
   /* Search */
-  searchWrapper: { paddingHorizontal: 20, paddingVertical: 12 },
+  searchWrapper: {},
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
     borderWidth: 1,
   },
-  searchInput: { flex: 1, marginLeft: 10, fontSize: 15 },
+  searchInput: { 
+    flex: 1,
+    fontWeight: '400',
+  },
 
   /* Hero Banner */
-  bannerWrapper: { marginHorizontal: 20, marginVertical: 16, height: 200, borderRadius: 24, overflow: 'hidden' },
-  bannerCard: { width: SCREEN_WIDTH - 80, height: 200, flexDirection: 'row', alignItems: 'center', padding: 20 },
-  bannerText: { flex: 1, justifyContent: 'center' },
-  bannerTag: { fontSize: 14, color: '#c4b5fd', fontWeight: '600', letterSpacing: 1 },
-  bannerDiscount: { fontSize: 36, color: '#fff', fontWeight: '800', marginVertical: 4 },
-  bannerSubtitle: { fontSize: 16, color: '#e5e7eb', fontWeight: '500' },
+  bannerWrapper: {
+    overflow: 'hidden',
+  },
+  bannerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  bannerText: { 
+    flex: 1, 
+    justifyContent: 'center' 
+  },
+  bannerTag: { 
+    color: '#c4b5fd', 
+    fontWeight: '600', 
+    letterSpacing: 1 
+  },
+  bannerDiscount: { 
+    color: '#fff', 
+    fontWeight: Platform.OS === 'ios' ? '800' : 'bold',
+  },
+  bannerSubtitle: { 
+    color: '#e5e7eb', 
+    fontWeight: '500' 
+  },
   bannerCta: {
-    marginTop: 12,
     backgroundColor: 'rgba(255,255,255,0.2)',
     alignSelf: 'flex-start',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    borderRadius: 999,
   },
-  bannerCtaText: { color: '#fff', fontWeight: '700', fontSize: 13 },
-  bannerImg: { width: 110, height: 110, borderRadius: 16, marginLeft: 12 },
-  dots: { flexDirection: 'row', justifyContent: 'center', marginTop: 12 },
-  dot: { height: 8, borderRadius: 4, marginHorizontal: 4 },
+  bannerCtaText: { 
+    color: '#fff', 
+    fontWeight: Platform.OS === 'ios' ? '700' : 'bold',
+  },
+  bannerImg: {
+    resizeMode: 'cover',
+  },
+  dots: { 
+    flexDirection: 'row', 
+    justifyContent: 'center' 
+  },
+  dot: {},
 
   /* Section */
-  section: { marginBottom: 32 },
+  section: { 
+    marginBottom: rs(32) 
+  },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    marginBottom: 12,
   },
-  sectionTitle: { fontSize: 22, fontWeight: '700' },
-  seeAll: { flexDirection: 'row', alignItems: 'center' },
-  seeAllText: { fontWeight: '600', marginRight: 4 },
+  sectionTitle: { 
+    fontWeight: Platform.OS === 'ios' ? '700' : 'bold',
+  },
+  seeAll: { 
+    flexDirection: 'row', 
+    alignItems: 'center' 
+  },
+  seeAllText: { 
+    fontWeight: '600' 
+  },
 
-  sectionScroll: { paddingLeft: 12 },
+  sectionScroll: { 
+    flexGrow: 1,
+  },
 
   /* Product Card */
   card: {
-    width: 170,
-    borderRadius: 20,
-    marginHorizontal: 8,
     overflow: 'hidden',
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: rs(8) },
     shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowRadius: rs(12),
     elevation: 12,
   },
-  cardImageWrapper: { position: 'relative' },
-  cardImage: { width: '100%', height: 140, resizeMode: 'cover' },
+  cardImageWrapper: { 
+    position: 'relative' 
+  },
+  cardImage: { 
+    width: '100%',
+    resizeMode: 'cover',
+  },
   favBtn: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    padding: 6,
-    borderRadius: 999,
   },
-  cardBody: { padding: 12 },
-  cardName: { fontSize: 14, fontWeight: '600', marginBottom: 4 },
-  cardPrice: { fontSize: 18, fontWeight: '800' },
+  cardBody: {},
+  cardName: { 
+    fontWeight: '600',
+  },
+  cardPrice: { 
+    fontWeight: Platform.OS === 'ios' ? '800' : 'bold',
+  },
   addBtn: {
-    marginTop: 8,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 6,
-    borderRadius: 12,
   },
-  addBtnText: { color: '#fff', marginLeft: 6, fontWeight: '600', fontSize: 13 },
+  addBtnText: { 
+    color: '#fff', 
+    fontWeight: '600' 
+  },
 
   /* Misc */
-  scroll: { flex: 1 },
-  bottomSpacer: { height: 60 },
-  emptyState: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
-  emptyText: { fontSize: 16, marginTop: 16 },
+  bottomSpacer: {},
+  emptyState: { 
+    alignItems: 'center', 
+    justifyContent: 'center' 
+  },
+  emptyText: { 
+    fontWeight: '500',
+  },
 });

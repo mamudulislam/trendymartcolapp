@@ -207,7 +207,7 @@ export default function LoginScreen() {
     // Simulate API call
     setTimeout(() => {
       setLoading(false);
-      login();
+      login({ name: 'John William' });
     }, 2000);
   };
 

@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import { useRouter } from 'expo-router';
 
 const NOTIFICATIONS = [
   {
@@ -98,12 +99,17 @@ const NotificationItem = ({ item }: { item: (typeof NOTIFICATIONS)[0] }) => {
 
 export default function NotificationsScreen() {
   const { colors, isDark } = useTheme();
+  const router = useRouter();
 
   return (
     <SafeAreaView style={[s.container, { backgroundColor: colors.background }]}>
       <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />
-      <View style={s.header}>
+      <View style={[s.header, { borderBottomColor: colors.border }]}>
+        <TouchableOpacity onPress={() => router.back()} style={s.backButton}>
+          <Ionicons name="arrow-back" size={24} color={colors.text} />
+        </TouchableOpacity>
         <Text style={[s.headerTitle, { color: colors.text }]}>Notifications</Text>
+        <View style={s.backButton} /> { /* Spacer to balance the header */ }
       </View>
       <FlatList
         data={NOTIFICATIONS}
@@ -121,13 +127,21 @@ const s = StyleSheet.create({
     flex: 1,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   listContainer: {

@@ -1,119 +1,84 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
-import { Ionicons } from '@expo/vector-icons';
-import { Platform, View, StyleSheet, Text } from 'react-native';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring, interpolate } from 'react-native-reanimated';
-import { BlurView } from 'expo-blur';
-import { useTheme } from '../../contexts/ThemeContext';
-import { useApp } from '../../contexts/AppContext';
-
-interface TabIconProps {
-  name: keyof typeof Ionicons.glyphMap;
-  focused: boolean;
-}
-
-const TabIcon = ({ name, focused }: TabIconProps) => {
-  const { colors } = useTheme();
-  const scale = useSharedValue(1);
-
-  React.useEffect(() => {
-    scale.value = withSpring(focused ? 1.2 : 1);
-  }, [focused]);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
-
-  return (
-    <View style={styles.tabIconContainer}>
-      <Animated.View style={animatedStyle}>
-        <Ionicons 
-          name={name} 
-          color={focused ? colors.primary : colors.textSecondary} 
-          size={24} 
-        />
-      </Animated.View>
-    </View>
-  );
-};
+import { Platform } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext'; // Adjust path if needed
 
 const TabsLayout = () => {
-  const { colors, isDark } = useTheme();
+  const { isDark } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          position: 'absolute',
-          bottom: 20,
-          left: 20,
-          right: 20,
-          elevation: 0,
-          backgroundColor: colors.tabBar,
-          borderRadius: 32,
-          height: 60,
-          shadowColor: colors.shadow,
-          shadowOffset: { width: 0, height: 10 },
-          shadowOpacity: isDark ? 0.3 : 0.15,
-          shadowRadius: 3.84,
-          borderTopWidth: 0,
-          borderWidth: 1,
-          borderColor: colors.border,
-          ...Platform.select({
-            android: {
-              borderTopWidth: 0,
-            },
-          })
-        },
         tabBarShowLabel: false,
+        tabBarActiveTintColor: '#FFFFFF',  // White when focused
+        tabBarInactiveTintColor: '#AAAAAA', // Gray when inactive
+        tabBarStyle: {
+          backgroundColor: isDark ? '#141414' : '#F5F5F5', // Deep black in dark, light gray in light
+          borderTopWidth: 0,
+          height: 60,              // Standard height
+          paddingBottom: 0,
+          paddingTop: 8,
+          ...Platform.select({
+            ios: {
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+            },
+            android: {
+              elevation: 8,
+            },
+          }),
+        },
+        tabBarItemStyle: {
+          padding: 0,
+        },
       }}
     >
       <Tabs.Screen
         name="Home"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon name={focused ? 'home' : 'home-outline'} focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? 'home' : 'home-outline'} size={28} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="Categories"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon name={focused ? 'list' : 'list-outline'} focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? 'list' : 'list-outline'} size={28} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="Cart"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon name={focused ? 'cart' : 'cart-outline'} focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? 'cart' : 'cart-outline'} size={28} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="Wishlist"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon name={focused ? 'heart' : 'heart-outline'} focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={28} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="Profile"
         options={{
-          tabBarIcon: ({ focused }) => <TabIcon name={focused ? 'person' : 'person-outline'} focused={focused} />,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={28} color={color} />
+          ),
         }}
       />
     </Tabs>
   );
 };
 
-const styles = StyleSheet.create({
-  tabIconContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
-
 export default TabsLayout;
-
-
-

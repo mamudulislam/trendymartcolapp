@@ -19,20 +19,11 @@ import { useAuth } from '../../../contexts/AuthContext';
 const AVATAR_SIZE = 100;
 
 /* ────────────────────── Mock User Data ────────────────────── */
-const user = {
-  name: 'John William',
-  email: 'john.william@example.com',
-  avatar: 'https://placehold.co/200x200/6366f1/ffffff?text=JW',
-  stats: {
-    orders: 24,
-    wishlist: 8,
-    reviews: 12,
-  },
-};
 
 /* ────────────────────── Reusable Components ────────────────────── */
 const ProfileHeader = () => {
   const { colors } = useTheme();
+  const { user } = useAuth();
   const scaleAnim = useState(new Animated.Value(1))[0];
   const router = useRouter();
 
@@ -66,6 +57,10 @@ const ProfileHeader = () => {
         break;
     }
   };
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <View style={s.header}>
