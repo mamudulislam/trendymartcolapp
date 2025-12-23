@@ -44,6 +44,7 @@ const RootLayoutNav = () => {
             animation: 'slide_from_right'
           }} 
         />
+        <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
       </Stack>
     </>
   );

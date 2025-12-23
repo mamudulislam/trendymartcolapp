@@ -1,18 +1,17 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
   Animated,
   Dimensions,
   FlatList,
   Image,
+  SafeAreaView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  SafeAreaView,
 } from 'react-native';
 import { useTheme } from '../../../contexts/ThemeContext';
 
