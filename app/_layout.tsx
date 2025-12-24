@@ -1,10 +1,9 @@
 import { Stack, usePathname } from 'expo-router';
-import React from 'react';
-import { ThemeProvider } from '../contexts/ThemeContext';
-import { AppProvider } from '../contexts/AppContext';
 import { StatusBar } from 'expo-status-bar';
-import { useTheme } from '../contexts/ThemeContext';
+import React from 'react';
+import { AppProvider } from '../contexts/AppContext';
 import { AuthProvider, useAuth } from '../contexts/AuthContext';
+import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 import LoginScreen from './login';
 
 const RootLayoutNav = () => {
@@ -45,6 +44,10 @@ const RootLayoutNav = () => {
           }} 
         />
         <Stack.Screen name="profile/edit" options={{ headerShown: false }} />
+        <Stack.Screen name="addresses" options={{ headerShown: false }} />
+        <Stack.Screen name="payment-methods" options={{ headerShown: false }} />
+        <Stack.Screen name="help" options={{ headerShown: false }} />
+        <Stack.Screen name="privacy" options={{ headerShown: false }} />
       </Stack>
     </>
   );

@@ -4,6 +4,7 @@ import {
   Alert,
   Dimensions,
   FlatList,
+  Linking,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -115,11 +116,15 @@ export default function AddressesScreen() {
     }
 
     if (isEditing && editingAddress) {
-      const updatedAddresses = addresses.map(addr =>
-        addr.id === editingAddress.id
-          ? { ...formData, id: editingAddress.id }
-          : formData.isDefault ? { ...addr, isDefault: false } : addr
-      );
+      const updatedAddresses = addresses.map(addr => {
+        if (addr.id === editingAddress.id) {
+          return { ...formData, id: editingAddress.id };
+        }
+        if (formData.isDefault) {
+          return { ...addr, isDefault: false };
+        }
+        return addr;
+      });
       setAddresses(updatedAddresses);
       Alert.alert('Success', 'Address updated successfully');
     } else {
@@ -241,11 +246,22 @@ export default function AddressesScreen() {
           <Text style={[styles.infoText, { color: colors.text }]}>{item.phone}</Text>
         </View>
         
-        <View style={styles.infoRow}>
+        <View style={[styles.infoRow, { alignItems: 'center' }]}>
           <Ionicons name="location-outline" size={14} color={colors.textTertiary} />
           <Text style={[styles.infoText, { color: colors.text }]} numberOfLines={2}>
-            {item.address}, {item.city}, {item.state} {item.zipCode}
+            {item.address}, {item.city}, {item.state} {item.zipCode}, {item.country}
           </Text>
+          <TouchableOpacity 
+            onPress={() => {
+              const address = `${item.address}, ${item.city}, ${item.state} ${item.zipCode}, ${item.country}`;
+              const encodedAddress = encodeURIComponent(address);
+              const url = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+              Linking.openURL(url);
+            }}
+            style={{ paddingLeft: 10 }}
+          >
+            <Ionicons name="navigate-outline" size={24} color={colors.primary} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -585,9 +601,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 24,
-    paddingBottom: 16,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 19,
   },
   headerTitle: {
     fontSize: 28,
@@ -647,7 +663,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   addressTitle: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '600',
     marginBottom: 4,
   },
@@ -682,8 +698,8 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 13,
+    lineHeight: 19,
   },
   defaultButton: {
     flexDirection: 'row',

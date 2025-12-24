@@ -76,46 +76,8 @@ const ProfileHeader = () => {
           </View>
         </Animated.View>
       </TouchableOpacity>
-
       <Text style={[s.name, { color: colors.text }]}>{user.name}</Text>
       <Text style={[s.email, { color: colors.textSecondary }]}>{user.email}</Text>
-
-      <View style={[s.statsRow, { 
-        backgroundColor: colors.card,
-        borderColor: colors.borderLight,
-        shadowColor: colors.shadow || '#000',
-      }]}>
-        <TouchableOpacity 
-          style={s.statItem} 
-          onPress={() => handleStatPress('orders')}
-          activeOpacity={0.7}
-        >
-          <Text style={[s.statValue, { color: colors.primary }]}>{user.stats.orders}</Text>
-          <Text style={[s.statLabel, { color: colors.textSecondary }]}>Orders</Text>
-        </TouchableOpacity>
-        
-        <View style={[s.statDivider, { backgroundColor: colors.border }]} />
-        
-        <TouchableOpacity 
-          style={s.statItem} 
-          onPress={() => handleStatPress('wishlist')}
-          activeOpacity={0.7}
-        >
-          <Text style={[s.statValue, { color: colors.primary }]}>{user.stats.wishlist}</Text>
-          <Text style={[s.statLabel, { color: colors.textSecondary }]}>Wishlist</Text>
-        </TouchableOpacity>
-        
-        <View style={[s.statDivider, { backgroundColor: colors.border }]} />
-        
-        <TouchableOpacity 
-          style={s.statItem} 
-          onPress={() => handleStatPress('reviews')}
-          activeOpacity={0.7}
-        >
-          <Text style={[s.statValue, { color: colors.primary }]}>{user.stats.reviews}</Text>
-          <Text style={[s.statLabel, { color: colors.textSecondary }]}>Reviews</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -313,40 +275,6 @@ export default function ProfileTab() {
             }
             showChevron={false}
           />
-          <SettingsItem
-            icon="moon-outline"
-            title="Dark Mode"
-            right={
-              <Switch
-                value={isDark}
-                onValueChange={toggleTheme}
-                trackColor={{ false: colors.border, true: `${colors.primary}40` }}
-                thumbColor={isDark ? colors.primary : colors.textTertiary}
-                ios_backgroundColor={colors.border}
-              />
-            }
-            showChevron={false}
-          />
-          <SettingsItem
-            icon="finger-print-outline"
-            title="Biometric Login"
-            right={
-              <Switch
-                value={biometric}
-                onValueChange={setBiometric}
-                trackColor={{ false: colors.border, true: `${colors.primary}40` }}
-                thumbColor={biometric ? colors.primary : colors.textTertiary}
-                ios_backgroundColor={colors.border}
-              />
-            }
-            showChevron={false}
-          />
-          <SettingsItem 
-            icon="globe-outline" 
-            title="Language" 
-            subtitle="English (US)" 
-            onPress={handleLanguage}
-          />
         </SettingsSection>
 
         <SettingsSection title="Support" last={true}>
@@ -360,20 +288,12 @@ export default function ProfileTab() {
             title="Privacy Policy" 
             onPress={handlePrivacyPolicy}
           />
-          <SettingsItem 
-            icon="document-text-outline" 
-            title="Terms of Service" 
-            onPress={handleTerms}
-          />
+          
         </SettingsSection>
 
         <LogoutButton />
         
-        <View style={s.versionContainer}>
-          <Text style={[s.versionText, { color: colors.textTertiary }]}>
-            Version 1.0.0
-          </Text>
-        </View>
+        
       </ScrollView>
     </SafeAreaView>
   );
