@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Alert,
   Animated,
@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useTheme } from '../../../contexts/ThemeContext';
+
 
 const AVATAR_SIZE = 100;
 
@@ -283,11 +284,12 @@ export default function ProfileTab() {
             title="Help & FAQ" 
             onPress={handleHelpFAQ}
           />
-          <SettingsItem 
+                    <SettingsItem 
             icon="shield-checkmark-outline" 
             title="Privacy Policy" 
             onPress={handlePrivacyPolicy}
           />
+         
           
         </SettingsSection>
 
