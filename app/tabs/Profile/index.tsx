@@ -452,8 +452,8 @@ const s = StyleSheet.create({
 
   /* Logout */
   logoutBtn: { 
-    marginTop: 8,
-    marginBottom: 24,
+    marginTop: 4,
+    marginBottom: 55,
     alignSelf: 'stretch',
   },
   logoutInner: {

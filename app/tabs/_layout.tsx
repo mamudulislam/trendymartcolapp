@@ -1,8 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import React from 'react';
-import { Platform } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext'; // Adjust path if needed
+import { Platform, View } from 'react-native';
+import { useTheme } from '../../contexts/ThemeContext';
+
+const ACTIVE = '#3B82F6';   // Modern blue
+const INACTIVE = '#9CA3AF';
+
+const TabIcon = ({ name, focused, color }: any) => (
+  <View style={{ alignItems: 'center', justifyContent: 'center' }}>
+    <Ionicons name={name} size={22} color={color} />
+    <View
+      style={{
+        marginTop: 6,
+        width: focused ? 16 : 6,
+        height: 3,
+        borderRadius: 2,
+        backgroundColor: focused ? color : 'transparent',
+      }}
+    />
+  </View>
+);
 
 const TabsLayout = () => {
   const { isDark } = useTheme();
@@ -12,28 +29,26 @@ const TabsLayout = () => {
       screenOptions={{
         headerShown: false,
         tabBarShowLabel: false,
-        tabBarActiveTintColor: '#FFFFFF',  // White when focused
-        tabBarInactiveTintColor: '#AAAAAA', // Gray when inactive
+        tabBarActiveTintColor: ACTIVE,
+        tabBarInactiveTintColor: INACTIVE,
         tabBarStyle: {
-          backgroundColor: isDark ? '#141414' : '#F5F5F5', // Deep black in dark, light gray in light
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: 12,
+          height: 60,
+          borderRadius: 20,
+          backgroundColor: isDark ? '#111827' : '#FFFFFF',
           borderTopWidth: 0,
-          height: 60,              // Standard height
-          paddingBottom: 0,
-          paddingTop: 8,
           ...Platform.select({
+            android: { elevation: 12 },
             ios: {
               shadowColor: '#000',
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-            },
-            android: {
-              elevation: 8,
+              shadowOpacity: 0.08,
+              shadowRadius: 10,
+              shadowOffset: { width: 0, height: 6 },
             },
           }),
-        },
-        tabBarItemStyle: {
-          padding: 0,
         },
       }}
     >
@@ -41,39 +56,63 @@ const TabsLayout = () => {
         name="Home"
         options={{
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} size={28} color={color} />
+            <TabIcon
+              focused={focused}
+              color={color}
+              name={focused ? 'home' : 'home-outline'}
+            />
           ),
         }}
       />
+
       <Tabs.Screen
         name="Categories"
         options={{
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? 'list' : 'list-outline'} size={28} color={color} />
+            <TabIcon
+              focused={focused}
+              color={color}
+              name={focused ? 'grid' : 'grid-outline'}
+            />
           ),
         }}
       />
+
       <Tabs.Screen
         name="Cart"
         options={{
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? 'cart' : 'cart-outline'} size={28} color={color} />
+            <TabIcon
+              focused={focused}
+              color={color}
+              name={focused ? 'cart' : 'cart-outline'}
+            />
           ),
         }}
       />
+
       <Tabs.Screen
         name="Wishlist"
         options={{
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? 'heart' : 'heart-outline'} size={28} color={color} />
+            <TabIcon
+              focused={focused}
+              color={color}
+              name={focused ? 'heart' : 'heart-outline'}
+            />
           ),
         }}
       />
+
       <Tabs.Screen
         name="Profile"
         options={{
           tabBarIcon: ({ focused, color }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={28} color={color} />
+            <TabIcon
+              focused={focused}
+              color={color}
+              name={focused ? 'person' : 'person-outline'}
+            />
           ),
         }}
       />
